@@ -57,7 +57,7 @@ services:
       - ./frontend:/app
       - /app/node_modules
     ports:
-      - "3001:3000"
+      - "3001:5173"
     environment:
       VITE_API_URL: http://localhost:8080
     networks:

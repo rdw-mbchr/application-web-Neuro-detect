@@ -44,7 +44,7 @@ class BrainFMRIPredictor:
 
         return fmri_model, ml_model, prep
 
-    def predict(self, file_bytes: bytes) -> dict:
+    def predict(self, file_bytes: bytes, filename: str = "scan.nii.gz") -> dict:
 
         # =========================
         # MOCK MODE
@@ -66,7 +66,10 @@ class BrainFMRIPredictor:
         # REAL MODEL MODE
         # =========================
 
-        with tempfile.NamedTemporaryFile(suffix=".nii.gz", delete=False) as tmp:
+        # Preserve the original extension so nibabel uses the correct reader
+        suffix = ".nii.gz" if filename.lower().endswith(".nii.gz") else ".nii"
+
+        with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
             tmp.write(file_bytes)
             tmp_path = tmp.name
 

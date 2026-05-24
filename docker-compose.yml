@@ -1,6 +1,7 @@
 services:
   postgres:
-    image: postgres:15-alpine
+    image: postgres:15
+    platform: linux/amd64
     container_name: neurodetect-postgres
     environment:
       POSTGRES_DB: neurodetect
@@ -28,10 +29,13 @@ services:
       JWT_SECRET: ${JWT_SECRET:-SuperSecretJWTKeyForNeuroDetect2026LongEnough123!}
       AI_SERVICE_URL: http://ai-service:8000
       APP_UPLOAD_DIR: /app/uploads
+      SPRING_FLYWAY_ENABLED: "true"
+      SPRING_FLYWAY_LOCATIONS: classpath:db/migration
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
     volumes:
       - uploads_data:/app/uploads
     ports:
-      - "8080:8080"
+      - "8082:8082"
     depends_on:
       postgres:
         condition: service_healthy
@@ -47,6 +51,18 @@ services:
       - ./ai-service/model:/app/model:ro
     networks:
       - app-net
+    deploy:
+      resources:
+        limits:
+          memory: 4g
+        reservations:
+          memory: 2g
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health')\""]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
   frontend:
     build:
@@ -59,7 +75,7 @@ services:
     ports:
       - "3001:5173"
     environment:
-      VITE_API_URL: http://localhost:8080
+      VITE_API_URL: http://localhost:8082
     networks:
       - app-net
     depends_on:

@@ -1,0 +1,2 @@
+ALTER TABLE reports ADD COLUMN report_number INT NOT NULL DEFAULT 0;
+ALTER TABLE reports ADD COLUMN file_name VARCHAR(255);

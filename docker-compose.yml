@@ -1,0 +1,92 @@
+services:
+  postgres:
+    image: postgres:15
+    platform: linux/amd64
+    container_name: neurodetect-postgres
+    environment:
+      POSTGRES_DB: neurodetect
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-devpassword123}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - app-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    container_name: neurodetect-backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/neurodetect
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-devpassword123}
+      JWT_SECRET: ${JWT_SECRET:-SuperSecretJWTKeyForNeuroDetect2026LongEnough123!}
+      AI_SERVICE_URL: http://ai-service:8000
+      APP_UPLOAD_DIR: /app/uploads
+      SPRING_FLYWAY_ENABLED: "true"
+      SPRING_FLYWAY_LOCATIONS: classpath:db/migration
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+    volumes:
+      - uploads_data:/app/uploads
+    ports:
+      - "8082:8082"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - app-net
+
+  ai-service:
+    build: ./ai-service
+    container_name: neurodetect-ai
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./ai-service/model:/app/model:ro
+    networks:
+      - app-net
+    deploy:
+      resources:
+        limits:
+          memory: 4g
+        reservations:
+          memory: 2g
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health')\""]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: neurodetect-frontend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "3001:5173"
+    environment:
+      VITE_API_URL: http://localhost:8082
+    networks:
+      - app-net
+    depends_on:
+      - backend
+    stdin_open: true
+    tty: true
+
+networks:
+  app-net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  uploads_data:

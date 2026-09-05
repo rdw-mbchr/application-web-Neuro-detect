@@ -1,31 +1,73 @@
-# Compiled class file
+# ── Java / Spring Boot ────────────────────────────────
+target/
 *.class
-
-# Log file
-*.log
-
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
 *.jar
 *.war
 *.nar
 *.ear
-*.zip
-*.tar.gz
-*.rar
-
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+!**/src/main/**/target/
+!**/src/test/**/target/
+.mvn/wrapper/maven-wrapper.jar
+HELP.md
+*.ctxt
+.mtj.tmp/
 hs_err_pid*
 replay_pid*
-# Modèles IA (très gros)
-ai-service/best_fmri_model.keras
-ai-service/best_ml_model.pkl
-ai-service/preprocessing.pkl
+
+# ── Python / AI Service ───────────────────────────────
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+ai-service/.venv/
+*.egg-info/
+.pytest_cache/
+
+# ── Modèles IA ────────────────────────────────────────
+# Les modèles livrés vivent dans ai-service/model/ et sont versionnés.
+# On ignore uniquement les modèles déposés ailleurs (entraînement local, etc.).
+ai-service/app/model/*
+!ai-service/app/model/.gitkeep
 ai-service/*.keras
+ai-service/*.h5
+ai-service/*.pt
+ai-service/*.pth
 ai-service/*.pkl
-ai-service/model/
+ai-service/*.onnx
+ai-service/*.pb
+
+# ── Node / React ──────────────────────────────────────
+node_modules/
+dist/
+build/
+.npm/
+
+# ── Secrets et variables d'environnement ──────────────
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.p12
+*.jks
+
+# ── IDE ───────────────────────────────────────────────
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+*.swp
+*.swo
+
+# ── Système ───────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.log
+logs/
+
+# ── Docker ────────────────────────────────────────────
+docker-compose.override.yml
+
+uploads/
+.claude/
